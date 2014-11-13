@@ -17,13 +17,12 @@ module Arkanoid
           next_start = Time.now
           delta = next_start - start
           start = next_start
-          if key == :"Ctrl+c"
+          manager.process_input key
+          if manager.update_state delta, width: screen.columns, height: screen.lines
+            render screen, canvas
+          else
             break
-          elsif
-            manager.process_input key
           end
-          manager.update_state delta, width: screen.columns, height: screen.lines
-          render screen, canvas
         end
       end
     end

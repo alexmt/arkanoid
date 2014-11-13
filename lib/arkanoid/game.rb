@@ -4,12 +4,13 @@ module Arkanoid
 
   class Platform
 
-    attr_accessor :speed
-
     def initialize(x = 0, width = 10)
       @x = x
       @width = width
     end
+
+    attr_accessor :speed
+    attr_reader :x, :width
 
     def draw(canvas)
       canvas.draw @x, canvas.height - 1, "-" * @width
@@ -55,6 +56,7 @@ module Arkanoid
     def initialize
       @ball = Ball.new 10, 10, 20, 20
       @platform = Platform.new
+      @stop_requested = false
     end
 
     def start
@@ -68,7 +70,16 @@ module Arkanoid
       @platform.move delta
       @ball.move delta
       @ball.bounce_x if options[:width] <= @ball.x or @ball.x <= 0
-      @ball.bounce_y if options[:height] <= @ball.y or @ball.y <= 0
+      if @ball.y <= 0
+        @ball.bounce_y
+      elsif options[:height] <= @ball.y
+        if @ball.x >= @platform.width and @ball.x <= @platform.x + @platform.width
+          @ball.bounce_y
+        else
+          @stop_requested = true
+        end
+      end
+      !@stop_requested
     end
 
     def process_input(key)
@@ -79,6 +90,8 @@ module Arkanoid
         @platform.speed = 100
       when :timeout
         @platform.speed = 0
+      when :"Ctrl+c"
+        @stop_requested = true
       end
     end
   end
